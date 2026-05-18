@@ -293,9 +293,12 @@ cp .env.example .env
 Now open `.env` in any text editor (VS Code, TextEdit, nano) and fill in:
 
 ```env
-# Your MetaMask private key (64 characters, NO 0x prefix)
+# Your MetaMask private key (64 characters, with or without 0x prefix)
 # Example: a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
-PRIVATE_KEY=paste_your_private_key_here
+# Or:      0xa1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
+# IMPORTANT: Must be exactly 64 hex characters (or 66 with 0x prefix)
+# If you haven't set up a wallet yet, leave this as-is — compilation will still work.
+PRIVATE_KEY=your_private_key_here
 
 # Alchemy URLs (from Step 5.1)
 AMOY_RPC_URL=https://polygon-amoy.g.alchemy.com/v2/your_key_here
