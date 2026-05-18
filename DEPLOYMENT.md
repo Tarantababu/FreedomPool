@@ -1,549 +1,767 @@
-# FreedomPool — Complete Deployment Guide
+# FreedomPool — Complete Deployment Guide (Beginner-Friendly)
 
-> **Version:** 1.0.0  
-> **Last Updated:** May 2026  
-> **Network:** Polygon (Mainnet: 137, Amoy Testnet: 80002)
+> This guide assumes you know **nothing** about crypto wallets, smart contracts, or blockchain deployment. Every single step is explained with screenshots-level detail.
 
 ---
 
 ## Table of Contents
 
-1. [Prerequisites](#1-prerequisites)
-2. [Repository Setup](#2-repository-setup)
-3. [Environment Configuration](#3-environment-configuration)
-4. [Smart Contract Deployment (Testnet)](#4-smart-contract-deployment-testnet)
-5. [Smart Contract Deployment (Mainnet)](#5-smart-contract-deployment-mainnet)
-6. [Frontend Deployment](#6-frontend-deployment)
-7. [Post-Deployment Configuration](#7-post-deployment-configuration)
-8. [Verification & Testing](#8-verification--testing)
-9. [Monitoring & Maintenance](#9-monitoring--maintenance)
-10. [Troubleshooting](#10-troubleshooting)
+1. [What You're Deploying](#1-what-youre-deploying)
+2. [Install Required Software](#2-install-required-software)
+3. [Create a Crypto Wallet (MetaMask)](#3-create-a-crypto-wallet-metamask)
+4. [Get Free Test Money](#4-get-free-test-money)
+5. [Create Required Accounts](#5-create-required-accounts)
+6. [Configure the Project](#6-configure-the-project)
+7. [Deploy Smart Contracts to Testnet](#7-deploy-smart-contracts-to-testnet)
+8. [Set Up Chainlink VRF (Lottery Randomness)](#8-set-up-chainlink-vrf-lottery-randomness)
+9. [Deploy the Website (Frontend)](#9-deploy-the-website-frontend)
+10. [Test Everything Works](#10-test-everything-works)
+11. [Deploy to Mainnet (Real Money)](#11-deploy-to-mainnet-real-money)
+12. [Ongoing Maintenance](#12-ongoing-maintenance)
+13. [Glossary](#13-glossary)
 
 ---
 
-## 1. Prerequisites
+## 1. What You're Deploying
 
-### Required Accounts
+FreedomPool has two parts:
 
-| Service | Purpose | URL |
-|---------|---------|-----|
-| Alchemy | RPC endpoints for Polygon | https://www.alchemy.com |
-| Polygonscan | Contract verification | https://polygonscan.com/register |
-| WalletConnect Cloud | Wallet integration | https://cloud.walletconnect.com |
-| Chainlink VRF | Verifiable randomness | https://vrf.chain.link |
-| Vercel | Frontend hosting | https://vercel.com |
-| GitHub | Source control | https://github.com |
+1. **Smart Contracts** — Programs that live on the Polygon blockchain. They handle deposits, yield generation, and the lottery. Once deployed, nobody can change them (not even you).
 
-### Required Software
+2. **Frontend Website** — A React web app that users interact with. It connects to the smart contracts via their wallet.
 
-```bash
-# Node.js 18+ (check version)
-node --version  # Should be >= 18.0.0
-
-# npm or yarn
-npm --version
-
-# Git
-git --version
+**The flow:**
+```
+User → Website → Wallet (MetaMask) → Smart Contracts on Polygon
 ```
 
-### Required Wallet
-
-- **MetaMask** or any EVM-compatible wallet
-- **NEVER use your main wallet for deployment** — create a dedicated deployer wallet
-- Export the private key (MetaMask → Account Details → Export Private Key)
-
 ---
 
-## 2. Repository Setup
+## 2. Install Required Software
+
+### 2.1 Install Node.js
+
+Node.js is the runtime that executes our deployment scripts.
+
+**macOS:**
+```bash
+# Option 1: Using Homebrew (recommended)
+brew install node
+
+# Option 2: Download installer from https://nodejs.org
+# Choose the "LTS" version (not "Current")
+```
+
+**Verify installation:**
+```bash
+node --version
+# Should show v18.x.x or higher
+
+npm --version
+# Should show 9.x.x or higher
+```
+
+### 2.2 Install Git
+
+Git is version control — it tracks changes to your code.
+
+**macOS:**
+```bash
+# It's usually pre-installed. Check:
+git --version
+
+# If not installed, macOS will prompt you to install Xcode Command Line Tools
+# Or install via Homebrew:
+brew install git
+```
+
+### 2.3 Clone the Repository
 
 ```bash
-# Clone the repository
+# Open Terminal (Cmd+Space, type "Terminal", press Enter)
+# Navigate to where you want the project:
+cd ~/Desktop
+
+# Clone (download) the code:
 git clone https://github.com/Tarantababu/FreedomPool.git
+
+# Enter the project folder:
 cd FreedomPool
 
-# Install smart contract dependencies
+# Install dependencies (this downloads all required libraries):
 npm install
 
-# Install frontend dependencies
+# Install frontend dependencies:
 cd frontend && npm install && cd ..
 ```
 
-### Project Structure
-
-```
-FreedomPool/
-├── contracts/                 # Solidity smart contracts
-│   ├── FreedomPool.sol        # Core vault & pool logic
-│   ├── YieldStrategy.sol      # Aave/RWA/Staking yield
-│   ├── PrizeDistributor.sol   # Chainlink VRF lottery
-│   ├── FreedomToken.sol       # FDM governance token
-│   ├── interfaces/            # Contract interfaces
-│   └── mocks/                 # Test mocks
-├── frontend/                  # React + Vite frontend
-│   └── src/
-│       ├── config/            # Contract addresses, wagmi, i18n
-│       ├── hooks/             # Contract interaction hooks
-│       ├── components/        # UI components
-│       ├── locales/           # 7 language files
-│       └── utils/             # Formatting utilities
-├── scripts/deploy.js          # Deployment script
-├── test/                      # Hardhat tests
-├── hardhat.config.js          # Network configuration
-├── FreedomPool-Standalone.jsx # UI prototype with all features
-└── DEPLOYMENT.md              # This file
-```
+You should now have a `FreedomPool` folder on your Desktop with all the code.
 
 ---
 
-## 3. Environment Configuration
+## 3. Create a Crypto Wallet (MetaMask)
 
-### Smart Contracts (.env)
+A wallet is like a bank account for crypto. You need one to deploy contracts.
 
-Create `.env` in the project root:
+### 3.1 Install MetaMask
+
+1. Open Chrome or Firefox
+2. Go to https://metamask.io/download/
+3. Click **"Install MetaMask for Chrome"** (or your browser)
+4. Click **"Add to Chrome"** → **"Add Extension"**
+5. A fox icon appears in your browser toolbar
+
+### 3.2 Create a New Wallet
+
+1. Click the MetaMask fox icon
+2. Click **"Create a new wallet"**
+3. Agree to terms
+4. Create a password (this is for your browser only, not your crypto)
+5. **CRITICAL:** MetaMask shows you 12 words (your "Secret Recovery Phrase")
+   - Write these down on paper
+   - Store them somewhere safe (not on your computer)
+   - Anyone with these words can steal all your crypto
+   - You can NEVER recover them if lost
+6. Confirm the words in order
+7. Done! You now have a wallet
+
+### 3.3 Get Your Wallet Address
+
+1. Click the MetaMask fox icon
+2. At the top, you'll see something like `0x7F3C...D560`
+3. Click it to copy your full address
+4. This is your **public address** — safe to share (like an email address)
+
+### 3.4 Get Your Private Key (Needed for Deployment)
+
+> ⚠️ **Your private key is like your bank PIN. NEVER share it with anyone. NEVER put it in code that gets uploaded to GitHub.**
+
+1. Click the MetaMask fox icon
+2. Click the three dots (⋮) next to your account name
+3. Click **"Account details"**
+4. Click **"Show private key"**
+5. Enter your MetaMask password
+6. Copy the 64-character hex string (looks like `a1b2c3d4e5f6...`)
+7. Save it somewhere safe temporarily — you'll need it in Step 6
+
+### 3.5 Add Polygon Network to MetaMask
+
+By default, MetaMask only shows Ethereum. We need to add Polygon:
+
+1. Click the MetaMask fox icon
+2. Click the network dropdown at the top (says "Ethereum Mainnet")
+3. Click **"Add network"**
+4. Click **"Add a network manually"**
+5. Fill in:
+   - **Network Name:** Polygon Mainnet
+   - **New RPC URL:** `https://polygon-rpc.com`
+   - **Chain ID:** `137`
+   - **Currency Symbol:** `MATIC`
+   - **Block Explorer URL:** `https://polygonscan.com`
+6. Click **Save**
+
+Now add the testnet too:
+1. Same steps, but use:
+   - **Network Name:** Polygon Amoy Testnet
+   - **New RPC URL:** `https://rpc-amoy.polygon.technology`
+   - **Chain ID:** `80002`
+   - **Currency Symbol:** `MATIC`
+   - **Block Explorer URL:** `https://amoy.polygonscan.com`
+2. Click **Save**
+
+---
+
+## 4. Get Free Test Money
+
+On the testnet, everything is free. You need "test MATIC" (for gas fees) and "test LINK" (for the lottery system).
+
+### 4.1 Get Test MATIC (Gas Money)
+
+Gas = the fee you pay to execute transactions on blockchain. On testnet it's free.
+
+1. Go to https://faucet.polygon.technology/
+2. Select network: **Amoy**
+3. Select token: **MATIC**
+4. Paste your wallet address (from Step 3.3)
+5. Click **"Submit"**
+6. Wait 30 seconds
+7. Check MetaMask — you should see 0.5 MATIC on Polygon Amoy
+
+If that faucet doesn't work, try: https://www.alchemy.com/faucets/polygon-amoy
+
+### 4.2 Get Test LINK (For Lottery Randomness)
+
+1. Go to https://faucets.chain.link/
+2. Connect your MetaMask wallet (click "Connect wallet")
+3. Select network: **Polygon Amoy**
+4. Check **"LINK"** token
+5. Complete the captcha
+6. Click **"Send request"**
+7. Wait 1-2 minutes
+8. You should receive 20 test LINK
+
+### 4.3 Get Test USDC (For Testing Deposits)
+
+1. Go to https://app.aave.com/faucet/
+2. Connect your MetaMask wallet
+3. Switch to **Polygon Amoy** network in MetaMask
+4. Find **USDC** in the list
+5. Click **"Faucet"**
+6. Approve the transaction in MetaMask
+7. You'll receive test USDC
+
+---
+
+## 5. Create Required Accounts
+
+You need accounts on 4 services. All have free tiers.
+
+### 5.1 Alchemy (Blockchain Connection)
+
+Alchemy provides a fast, reliable connection to the Polygon blockchain.
+
+1. Go to https://www.alchemy.com/
+2. Click **"Sign Up"** (use Google or email)
+3. After signing in, click **"Create new app"**
+4. Fill in:
+   - **App name:** FreedomPool
+   - **Chain:** Polygon
+   - **Network:** Polygon Amoy (testnet)
+5. Click **"Create app"**
+6. On the app page, click **"API Key"**
+7. Copy the **HTTPS** URL — it looks like:
+   ```
+   https://polygon-amoy.g.alchemy.com/v2/abc123xyz789...
+   ```
+8. Save this — it's your `AMOY_RPC_URL`
+
+**For mainnet later:** Create another app with Network = "Polygon Mainnet" and save that URL as `POLYGON_RPC_URL`.
+
+### 5.2 Polygonscan (Contract Verification)
+
+Polygonscan lets you verify your contracts so anyone can read the source code.
+
+1. Go to https://polygonscan.com/register
+2. Create an account (email + password)
+3. After login, go to https://polygonscan.com/myapikey
+4. Click **"Add"** to create a new API key
+5. Give it a name: "FreedomPool"
+6. Copy the API key (looks like `ABC123DEF456...`)
+7. Save this — it's your `POLYGONSCAN_API_KEY`
+
+### 5.3 WalletConnect Cloud (Wallet Integration)
+
+WalletConnect lets users connect various wallets to your website.
+
+1. Go to https://cloud.walletconnect.com/
+2. Sign up (Google or email)
+3. Click **"Create a project"**
+4. Fill in:
+   - **Name:** FreedomPool
+   - **Type:** App
+   - **URL:** (leave blank for now, or put `https://freedompool.vercel.app`)
+5. Click **"Create"**
+6. Copy the **Project ID** (looks like `a1b2c3d4e5f6g7h8i9j0...`)
+7. Save this — it's your `VITE_WALLETCONNECT_PROJECT_ID`
+
+### 5.4 Vercel (Website Hosting)
+
+Vercel hosts your frontend website for free.
+
+1. Go to https://vercel.com/
+2. Click **"Sign Up"**
+3. Choose **"Continue with GitHub"**
+4. Authorize Vercel to access your GitHub
+5. Done! You'll use this in Step 9.
+
+---
+
+## 6. Configure the Project
+
+Now you'll create configuration files with all the keys you collected.
+
+### 6.1 Create the Smart Contract Config
 
 ```bash
+# Make sure you're in the FreedomPool folder
+cd ~/Desktop/FreedomPool
+
+# Create the .env file
 cp .env.example .env
 ```
 
-Fill in the values:
+Now open `.env` in any text editor (VS Code, TextEdit, nano) and fill in:
 
 ```env
-# ═══════════════════════════════════════════════════════════
-# WALLET (CRITICAL — NEVER COMMIT THIS FILE)
-# ═══════════════════════════════════════════════════════════
-PRIVATE_KEY=your_64_char_hex_private_key_without_0x
+# Your MetaMask private key (64 characters, NO 0x prefix)
+# Example: a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
+PRIVATE_KEY=paste_your_private_key_here
 
-# ═══════════════════════════════════════════════════════════
-# RPC ENDPOINTS (from Alchemy)
-# ═══════════════════════════════════════════════════════════
-POLYGON_RPC_URL=https://polygon-mainnet.g.alchemy.com/v2/YOUR_KEY
-AMOY_RPC_URL=https://polygon-amoy.g.alchemy.com/v2/YOUR_KEY
+# Alchemy URLs (from Step 5.1)
+AMOY_RPC_URL=https://polygon-amoy.g.alchemy.com/v2/your_key_here
+POLYGON_RPC_URL=https://polygon-mainnet.g.alchemy.com/v2/your_key_here
 
-# ═══════════════════════════════════════════════════════════
-# POLYGONSCAN (for contract verification)
-# ═══════════════════════════════════════════════════════════
-POLYGONSCAN_API_KEY=your_polygonscan_api_key
+# Polygonscan API key (from Step 5.2)
+POLYGONSCAN_API_KEY=your_polygonscan_key_here
 
-# ═══════════════════════════════════════════════════════════
-# CHAINLINK VRF — AMOY TESTNET
-# ═══════════════════════════════════════════════════════════
-VRF_SUBSCRIPTION_ID_AMOY=your_subscription_id_number
-
-# ═══════════════════════════════════════════════════════════
-# CHAINLINK VRF — POLYGON MAINNET
-# ═══════════════════════════════════════════════════════════
-VRF_SUBSCRIPTION_ID=your_mainnet_subscription_id
+# Chainlink VRF Subscription ID (you'll get this in Step 8)
+# Leave as 0 for now, we'll fill it in later
+VRF_SUBSCRIPTION_ID_AMOY=0
 ```
 
-### Frontend (.env)
+**Save the file.**
 
-Create `frontend/.env`:
+### 6.2 Create the Frontend Config
 
 ```bash
-cp frontend/.env.example frontend/.env
+cd frontend
+cp .env.example .env
 ```
 
+Open `frontend/.env` and fill in:
+
 ```env
+# Use testnet for now (80002 = Amoy testnet, 137 = mainnet)
 VITE_CHAIN_ID=80002
-VITE_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
+
+# WalletConnect Project ID (from Step 5.3)
+VITE_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id_here
 ```
+
+**Save the file.**
 
 ---
 
-## 4. Smart Contract Deployment (Testnet)
+## 7. Deploy Smart Contracts to Testnet
 
-### Step 4.1 — Get Testnet Funds
+This is the big step — you're putting your programs on the blockchain.
 
-1. **MATIC (gas):** https://faucet.polygon.technology/ → Select Amoy → Paste address
-2. **Test USDC:** https://app.aave.com/faucet/ → Switch to Amoy → Mint USDC
-3. **Test LINK (for VRF):** https://faucets.chain.link/ → Select Polygon Amoy
+### 7.1 Compile the Contracts
 
-### Step 4.2 — Set Up Chainlink VRF Subscription
-
-1. Go to https://vrf.chain.link
-2. Connect wallet → Switch to **Polygon Amoy**
-3. Click **"Create Subscription"**
-4. Fund with 5+ LINK tokens
-5. Copy the **Subscription ID** → paste into `.env` as `VRF_SUBSCRIPTION_ID_AMOY`
-
-### Step 4.3 — Compile Contracts
+"Compiling" converts human-readable Solidity code into bytecode the blockchain can execute.
 
 ```bash
+# Make sure you're in the project root
+cd ~/Desktop/FreedomPool
+
+# Compile
 npx hardhat compile
 ```
 
-Expected output:
+**Expected output:**
 ```
 Compiled 7 Solidity files successfully (with viaIR)
 ```
 
-### Step 4.4 — Run Tests
+If you see errors, check that `npm install` completed successfully in Step 2.3.
 
-```bash
-npx hardhat test
-```
-
-### Step 4.5 — Deploy to Amoy
+### 7.2 Deploy to Amoy Testnet
 
 ```bash
 npx hardhat run scripts/deploy.js --network amoy
 ```
 
-Expected output:
+**This will:**
+1. Deploy 4 contracts to the Polygon Amoy testnet
+2. Wire them together (tell each contract about the others)
+3. Save all addresses to `deployments/amoy.json`
+
+**Expected output:**
 ```
 ═══════════════════════════════════════════════════════════
   FreedomPool Deployment
 ═══════════════════════════════════════════════════════════
   Network:  amoy (chain 80002)
-  Deployer: 0xYourAddress...
+  Deployer: 0xYourWalletAddress
   Balance:  0.45 MATIC
 ───────────────────────────────────────────────────────────
 
 1️⃣  Deploying FreedomToken (FDM)...
-   ✅ FreedomToken: 0x...
+   ✅ FreedomToken: 0xABC123...
 
 2️⃣  Deploying YieldStrategy...
-   ✅ YieldStrategy: 0x...
+   ✅ YieldStrategy: 0xDEF456...
 
 3️⃣  Deploying PrizeDistributor...
-   ✅ PrizeDistributor: 0x...
+   ✅ PrizeDistributor: 0x789GHI...
 
 4️⃣  Deploying FreedomPool (core)...
-   ✅ FreedomPool: 0x...
+   ✅ FreedomPool: 0xJKL012...
 
 5️⃣  Wiring contracts...
-   → FreedomPool.setYieldStrategy ✓
-   → FreedomPool.setPrizeDistributor ✓
-   → FreedomPool.setFreedomToken ✓
-   → YieldStrategy.setPool ✓
-   → PrizeDistributor.setPool ✓
-   → FreedomToken.addMinter(pool) ✓
+   → All connections made ✓
 
 ═══════════════════════════════════════════════════════════
   ✅ DEPLOYMENT COMPLETE
 ═══════════════════════════════════════════════════════════
-
   📄 Deployment saved to ./deployments/amoy.json
 ```
 
-### Step 4.6 — Add PrizeDistributor as VRF Consumer
+### 7.3 Save Your Contract Addresses
 
-1. Go back to https://vrf.chain.link
-2. Open your subscription
-3. Click **"Add Consumer"**
-4. Paste the **PrizeDistributor** contract address
+Open `deployments/amoy.json` — it contains all your deployed contract addresses. You'll need these for the frontend.
 
-### Step 4.7 — Verify Contracts (Optional)
-
-```bash
-# Verify FreedomPool
-npx hardhat verify --network amoy \
-  FREEDOM_POOL_ADDRESS \
-  "0x41E94Eb71898E8A20f3B1a45b5DcFBa6E46E8F6e" \
-  "YOUR_DEPLOYER_ADDRESS" \
-  "YOUR_DEPLOYER_ADDRESS"
-
-# Verify FreedomToken
-npx hardhat verify --network amoy \
-  FREEDOM_TOKEN_ADDRESS \
-  "YOUR_DEPLOYER_ADDRESS"
-```
+**If deployment fails:**
+- "Insufficient funds" → Go back to Step 4.1 and get more test MATIC
+- "Nonce too low" → Wait 30 seconds and try again
+- "Could not connect" → Check your `AMOY_RPC_URL` in `.env`
 
 ---
 
-## 5. Smart Contract Deployment (Mainnet)
+## 8. Set Up Chainlink VRF (Lottery Randomness)
 
-> ⚠️ **Only deploy to mainnet after thorough testnet testing and ideally a security audit.**
+Chainlink VRF provides provably fair random numbers for the lottery. Without it, the lottery can't pick winners.
 
-### Step 5.1 — Mainnet Preparation
+### 8.1 Create a VRF Subscription
 
-1. Ensure deployer wallet has **at least 5 MATIC** for gas
-2. Create a Chainlink VRF subscription on **Polygon Mainnet**
-3. Fund VRF subscription with **10+ LINK**
-4. Update `.env` with `VRF_SUBSCRIPTION_ID` (mainnet)
+1. Go to https://vrf.chain.link/
+2. Click **"Connect wallet"** (top right)
+3. MetaMask will pop up — approve the connection
+4. **Switch to Polygon Amoy** network in MetaMask (click the network dropdown)
+5. The page should now show "Polygon Amoy" at the top
+6. Click **"Create Subscription"**
+7. MetaMask will ask you to confirm a transaction — click **"Confirm"**
+8. Wait for the transaction to complete
+9. You'll see your new subscription with an **ID number** (like `1234`)
+10. **Copy this number** — this is your VRF Subscription ID
 
-### Step 5.2 — Deploy
+### 8.2 Fund the Subscription with LINK
 
-```bash
-npx hardhat run scripts/deploy.js --network polygon
+1. On the same page, click your subscription
+2. Click **"Fund subscription"**
+3. Enter amount: `5` (5 LINK tokens)
+4. Click **"Fund"**
+5. Confirm in MetaMask
+6. Wait for transaction to complete
+
+### 8.3 Add Your Contract as a Consumer
+
+1. On your subscription page, click **"Add consumer"**
+2. Paste the **PrizeDistributor** address from Step 7.2 (find it in `deployments/amoy.json`)
+3. Click **"Add consumer"**
+4. Confirm in MetaMask
+
+### 8.4 Update Your .env File
+
+Now go back to your `.env` file and update:
+
+```env
+VRF_SUBSCRIPTION_ID_AMOY=1234
 ```
 
-### Step 5.3 — Post-Mainnet Steps
-
-1. Add PrizeDistributor as VRF consumer on mainnet subscription
-2. Verify all contracts on Polygonscan
-3. Transfer ownership to a multisig (e.g., Gnosis Safe)
-4. Register with Chainlink Automation (Keepers) for automated epoch advancement
-
-### Mainnet Contract Addresses (External)
-
-| Contract | Address | Purpose |
-|----------|---------|---------|
-| USDC (Native) | `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359` | Deposit token |
-| Aave V3 Pool | `0x794a61358D6845594F94dc1DB02A252b5b4814aD` | Yield generation |
-| aPolUSDC | `0xA4D94019934D8333Ef880ABFFbF2FDd611C762BD` | Interest-bearing token |
-| VRF Coordinator | `0xAE975071Be8F8eE67addBC1A82488F1C24858067` | Randomness |
-| Keeper Registry | `0x02777053d6764996e594c3E88AF1D58D5363a2e6` | Automation |
+(Replace `1234` with your actual subscription ID from Step 8.1)
 
 ---
 
-## 6. Frontend Deployment
+## 9. Deploy the Website (Frontend)
 
-### Step 6.1 — Update Contract Addresses
+### 9.1 Update Contract Addresses in the Frontend
 
-After deployment, update `frontend/src/config/contracts.js` with your deployed addresses.
+Open `frontend/src/config/contracts.js` in a text editor.
 
-You can read them from `deployments/amoy.json` or `deployments/polygon.json`:
-
+Find the section that looks like:
 ```javascript
-// In frontend/src/config/contracts.js
 80002: {
-  FreedomPool: "0x_FROM_DEPLOYMENT_OUTPUT",
-  YieldStrategy: "0x_FROM_DEPLOYMENT_OUTPUT",
-  PrizeDistributor: "0x_FROM_DEPLOYMENT_OUTPUT",
-  FreedomToken: "0x_FROM_DEPLOYMENT_OUTPUT",
+  FreedomPool: "0x0000000000000000000000000000000000000000",
+  YieldStrategy: "0x0000000000000000000000000000000000000000",
+  PrizeDistributor: "0x0000000000000000000000000000000000000000",
+  FreedomToken: "0x0000000000000000000000000000000000000000",
   USDC: "0x41E94Eb71898E8A20f3B1a45b5DcFBa6E46E8F6e",
 },
 ```
 
-### Step 6.2 — Update WalletConnect Project ID
+Replace the `0x000...` addresses with the real ones from `deployments/amoy.json`.
 
-In `frontend/src/config/wagmi.js`:
+### 9.2 Update WalletConnect Project ID
 
+Open `frontend/src/config/wagmi.js` and replace:
 ```javascript
-projectId: "YOUR_ACTUAL_PROJECT_ID_FROM_WALLETCONNECT_CLOUD",
+projectId: "YOUR_WALLETCONNECT_PROJECT_ID",
 ```
+with your actual project ID from Step 5.3.
 
-### Step 6.3 — Test Locally
+### 9.3 Test Locally
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-Open http://localhost:5173 and verify:
-- Wallet connects successfully
-- Network switches to Amoy/Polygon
-- Deposit flow works end-to-end
-- Language switcher works (7 languages)
+Open http://localhost:5173 in your browser. You should see the FreedomPool website.
 
-### Step 6.4 — Build for Production
+Try:
+- Click "Connect Wallet" — MetaMask should pop up
+- Switch to Polygon Amoy in MetaMask
+- The site should show "Testnet" badge
+
+Press `Ctrl+C` in terminal to stop the local server.
+
+### 9.4 Deploy to Vercel (Free Hosting)
+
+**Method 1: Automatic (Recommended)**
+
+Since your code is on GitHub, Vercel can auto-deploy every time you push changes.
+
+1. Go to https://vercel.com/new
+2. Click **"Import Git Repository"**
+3. Find and select **"Tarantababu/FreedomPool"**
+4. Configure the project:
+   - **Root Directory:** Click "Edit" and type `frontend`
+   - **Framework Preset:** Should auto-detect as "Vite"
+5. Click **"Environment Variables"** and add:
+   - Name: `VITE_CHAIN_ID` → Value: `80002`
+   - Name: `VITE_WALLETCONNECT_PROJECT_ID` → Value: your project ID
+6. Click **"Deploy"**
+7. Wait 1-2 minutes
+8. Vercel gives you a URL like `freedompool-abc123.vercel.app`
+9. **That's your live website!**
+
+**Method 2: Manual (via CLI)**
 
 ```bash
-cd frontend
-npm run build
-```
-
-### Step 6.5 — Deploy to Vercel
-
-**Option A: Vercel CLI**
-
-```bash
-# Install Vercel CLI globally
+# Install Vercel CLI
 npm install -g vercel
 
-# Deploy (from frontend directory)
+# From the frontend folder
 cd frontend
+
+# Deploy
 vercel
 
-# Follow prompts:
-# - Set up and deploy? → Yes
-# - Which scope? → Your account
-# - Link to existing project? → No
-# - Project name? → freedompool
-# - Directory? → ./
-# - Override settings? → No
+# It will ask questions:
+# Set up and deploy? → y
+# Which scope? → (press Enter for your account)
+# Link to existing project? → N
+# Project name? → freedompool
+# Directory? → ./
+# Override settings? → N
 
-# Deploy to production
+# For production deployment:
 vercel --prod
 ```
 
-**Option B: GitHub Integration (Recommended)**
+### 9.5 Set Up Custom Domain (Optional)
 
-1. Push code to GitHub (already done)
-2. Go to https://vercel.com/new
-3. Click **"Import Git Repository"**
-4. Select `Tarantababu/FreedomPool`
-5. Configure:
-   - **Root Directory:** `frontend`
-   - **Framework Preset:** Vite
-   - **Build Command:** `npm run build`
-   - **Output Directory:** `dist`
-6. Add Environment Variables:
-   - `VITE_CHAIN_ID` = `80002` (or `137` for mainnet)
-   - `VITE_WALLETCONNECT_PROJECT_ID` = your project ID
-7. Click **Deploy**
+If you own a domain (like `freedompool.io`):
 
-Every push to `main` will auto-deploy.
-
-### Step 6.6 — Custom Domain (Optional)
-
-In Vercel Dashboard → Project → Settings → Domains:
-1. Add domain (e.g., `app.freedompool.io`)
-2. Configure DNS as instructed (CNAME or A record)
+1. In Vercel dashboard, go to your project
+2. Click **Settings** → **Domains**
+3. Type your domain and click **Add**
+4. Vercel shows you DNS records to add
+5. Go to your domain registrar (GoDaddy, Namecheap, etc.)
+6. Add the DNS records Vercel showed you
+7. Wait 5-30 minutes for DNS to propagate
+8. Your site is now live at your custom domain!
 
 ---
 
-## 7. Post-Deployment Configuration
+## 10. Test Everything Works
 
-### Chainlink Automation (Keepers)
+### 10.1 Full Test Checklist
 
-To automate weekly epoch advancement:
+Open your deployed website and test each step:
 
-1. Go to https://automation.chain.link
-2. Register new Upkeep
-3. Select **"Custom logic"**
-4. Enter the **FreedomPool** contract address
-5. Fund with LINK
-6. The contract's `checkUpkeep` / `performUpkeep` functions handle the rest
+- [ ] **Connect wallet** — Click "Connect Wallet", MetaMask pops up, approve
+- [ ] **Correct network** — Site shows "Testnet" or "Polygon Amoy"
+- [ ] **Language switcher** — Click the language dropdown, try Arabic (should go RTL)
+- [ ] **Deposit flow:**
+  1. Click "Yatırım Yap" (or "Make a Deposit" in English)
+  2. Select a pool (Koruma is easiest — only needs 10 USDC)
+  3. Enter amount: `50`
+  4. Click "Approve & Deposit"
+  5. MetaMask pops up twice: once to approve USDC spending, once to deposit
+  6. After both transactions confirm, you should see your position
+- [ ] **Position shows** — Active position card with amount, pool name, lock status
+- [ ] **Referral link** — Click "Share Referral", check clipboard has a link
+- [ ] **Withdraw** — Click "Çek" (Withdraw), confirm in MetaMask
 
-### RWA & Staking Vaults (Optional)
+### 10.2 View on Polygonscan
 
-After deployment, configure additional yield sources:
+1. Go to https://amoy.polygonscan.com/
+2. Paste your FreedomPool contract address
+3. Click the **"Events"** tab
+4. You should see `Deposited` events from your test
+
+---
+
+## 11. Deploy to Mainnet (Real Money)
+
+> ⚠️ **Only do this after thorough testing on testnet. Consider getting a security audit first.**
+
+### 11.1 Differences from Testnet
+
+| | Testnet | Mainnet |
+|---|---------|---------|
+| Money | Fake (free) | Real ($$$) |
+| Network | Amoy (80002) | Polygon (137) |
+| MATIC needed | Free from faucet | Buy on exchange (~$5-10) |
+| LINK needed | Free from faucet | Buy on exchange (~$50) |
+| Mistakes | No consequences | Could lose real money |
+
+### 11.2 Mainnet Deployment Steps
+
+1. **Get real MATIC:** Buy on Coinbase/Binance, send to your deployer wallet
+2. **Get real LINK:** Buy LINK on Polygon, need ~10 LINK for VRF
+3. **Create mainnet Alchemy app** (Step 5.1 but select "Polygon Mainnet")
+4. **Create mainnet VRF subscription** (Step 8 but on Polygon Mainnet)
+5. **Update `.env`:**
+   ```env
+   POLYGON_RPC_URL=https://polygon-mainnet.g.alchemy.com/v2/your_key
+   VRF_SUBSCRIPTION_ID=your_mainnet_subscription_id
+   ```
+6. **Deploy:**
+   ```bash
+   npx hardhat run scripts/deploy.js --network polygon
+   ```
+7. **Update frontend** with mainnet addresses
+8. **Change `VITE_CHAIN_ID` to `137`** in Vercel environment variables
+9. **Redeploy frontend** (push to GitHub or run `vercel --prod`)
+
+### 11.3 Security Steps for Mainnet
+
+- [ ] Transfer contract ownership to a **multisig wallet** (like Gnosis Safe)
+- [ ] Set up **Chainlink Automation** (Keepers) for automatic weekly epochs
+- [ ] Verify all contracts on Polygonscan
+- [ ] Consider a professional security audit ($5K-$50K depending on scope)
+
+---
+
+## 12. Ongoing Maintenance
+
+### Weekly Tasks
+
+| Task | How |
+|------|-----|
+| Check VRF LINK balance | Go to vrf.chain.link, top up if < 5 LINK |
+| Verify epoch advanced | Check `currentEpoch()` on Polygonscan |
+| Monitor TVL | Check `totalDeposits()` on Polygonscan |
+
+### Monthly Tasks
+
+| Task | How |
+|------|-----|
+| Check Alchemy usage | Dashboard at alchemy.com |
+| Review Vercel analytics | Dashboard at vercel.com |
+| Update dependencies | `npm update` in both root and frontend |
+
+### How to Make Changes
 
 ```bash
-# Connect to deployed YieldStrategy and set vaults
-npx hardhat console --network amoy
+# 1. Pull latest code
+git pull origin main
 
-> const ys = await ethers.getContractAt("YieldStrategy", "YIELD_STRATEGY_ADDRESS")
-> await ys.setRwaVault("RWA_VAULT_ADDRESS")
-> await ys.setStakingVault("STAKING_VAULT_ADDRESS")
-```
+# 2. Create a new branch for your changes
+git checkout -b feature/my-change
 
-### Ownership Transfer (Mainnet)
+# 3. Make your changes...
 
-For production, transfer ownership to a multisig:
+# 4. Test locally
+cd frontend && npm run dev
 
-```bash
-npx hardhat console --network polygon
+# 5. Commit and push
+git add .
+git commit -m "feat: description of what you changed"
+git push -u origin feature/my-change
 
-> const pool = await ethers.getContractAt("FreedomPool", "POOL_ADDRESS")
-> await pool.transferOwnership("GNOSIS_SAFE_ADDRESS")
-```
-
----
-
-## 8. Verification & Testing
-
-### End-to-End Test Flow
-
-1. **Connect wallet** on correct network
-2. **Get test USDC** from Aave faucet
-3. **Approve USDC** → Transaction 1
-4. **Deposit 100 USDC** into Koruma pool → Transaction 2
-5. **Verify on Polygonscan** that deposit event was emitted
-6. **Wait 1 epoch** (or call `advanceEpoch()` as owner)
-7. **Claim rewards** if any yield was generated
-8. **Withdraw** and verify penalty logic
-9. **Test language switcher** (EN, DE, TR, FR, ES, AR, ZH)
-10. **Test referral link** copy-to-clipboard
-
-### Contract Verification Checklist
-
-- [ ] FreedomPool verified on Polygonscan
-- [ ] YieldStrategy verified
-- [ ] PrizeDistributor verified
-- [ ] FreedomToken verified
-- [ ] VRF consumer added to subscription
-- [ ] Keepers upkeep registered (mainnet)
-- [ ] Ownership transferred to multisig (mainnet)
-
----
-
-## 9. Monitoring & Maintenance
-
-### Key Metrics to Monitor
-
-| Metric | How to Check |
-|--------|-------------|
-| TVL | `FreedomPool.totalDeposits()` |
-| Current Epoch | `FreedomPool.currentEpoch()` |
-| Pending Yield | `YieldStrategy.pendingYield()` |
-| Freedom Prize Pool | `PrizeDistributor.freedomPrizePool()` |
-| VRF Balance | Check on vrf.chain.link |
-| Keeper Balance | Check on automation.chain.link |
-
-### Weekly Maintenance
-
-1. Check VRF subscription LINK balance (top up if < 5 LINK)
-2. Check Keeper LINK balance
-3. Verify epoch advanced correctly
-4. Monitor Aave positions for any issues
-
----
-
-## 10. Troubleshooting
-
-### Common Issues
-
-| Issue | Solution |
-|-------|----------|
-| "Insufficient funds" on deploy | Get more MATIC from faucet |
-| VRF callback not received | Check subscription has LINK, consumer is added |
-| Frontend can't connect | Verify contract addresses in `contracts.js` |
-| "Execution reverted" on deposit | Check USDC approval and balance |
-| Epoch not advancing | Check Keeper registration or call manually |
-
-### Useful Commands
-
-```bash
-# Check deployment addresses
-cat deployments/amoy.json
-
-# Open Hardhat console
-npx hardhat console --network amoy
-
-# Manually advance epoch (owner only)
-> const pool = await ethers.getContractAt("FreedomPool", "ADDRESS")
-> await pool.advanceEpoch()
-
-# Check user position
-> await pool.getUserPosition("USER_ADDRESS")
-
-# Emergency pause
-> await pool.pause()
+# 6. Go to GitHub and create a Pull Request
+# 7. Merge the PR
+# 8. Vercel auto-deploys the new version
 ```
 
 ---
 
-## Cost Summary
+## 13. Glossary
 
-### Testnet (Free)
-
-| Item | Cost |
-|------|------|
-| Deployment gas | Free (test MATIC) |
-| Alchemy RPC | Free tier |
-| Vercel hosting | Free tier |
-| WalletConnect | Free tier |
-| Chainlink VRF | Free (test LINK) |
-
-### Mainnet (Estimated)
-
-| Item | Cost |
-|------|------|
-| Deployment gas | ~$5-10 (MATIC) |
-| Chainlink VRF | ~$0.25 per draw (LINK) |
-| Chainlink Keepers | ~$0.10 per epoch (LINK) |
-| Vercel hosting | Free tier (100GB/mo) |
-| Custom domain | ~$12/year |
-| **Total first month** | **~$20-30** |
-
----
-
-## Security Checklist (Before Mainnet)
-
-- [ ] Smart contract audit completed
-- [ ] All tests passing
-- [ ] Ownership transferred to multisig
-- [ ] Emergency pause tested
-- [ ] No private keys in codebase
-- [ ] Frontend environment variables set via Vercel dashboard (not committed)
-- [ ] Rate limiting on RPC endpoints
-- [ ] CORS configured properly
-- [ ] CSP headers set on frontend
+| Term | Meaning |
+|------|---------|
+| **Smart Contract** | A program that runs on the blockchain. Once deployed, it can't be changed. |
+| **Wallet** | Software that holds your crypto keys. Like a bank account you fully control. |
+| **Private Key** | A secret 64-character code that controls your wallet. NEVER share it. |
+| **Gas** | The fee paid to execute transactions on blockchain. Paid in MATIC on Polygon. |
+| **MATIC** | The native currency of Polygon. Used to pay gas fees. |
+| **USDC** | A stablecoin pegged to $1 USD. What users deposit into FreedomPool. |
+| **LINK** | Chainlink's token. Used to pay for VRF (randomness) and Keepers (automation). |
+| **Testnet** | A fake version of the blockchain for testing. Everything is free. |
+| **Mainnet** | The real blockchain where real money is used. |
+| **RPC URL** | A web address that connects your code to the blockchain (provided by Alchemy). |
+| **ABI** | Application Binary Interface — tells the frontend how to talk to contracts. |
+| **Epoch** | A time period (1 week) in FreedomPool. Each epoch has one lottery draw. |
+| **TVL** | Total Value Locked — how much money is deposited in the protocol. |
+| **APY** | Annual Percentage Yield — the yearly interest rate. |
+| **VRF** | Verifiable Random Function — Chainlink's provably fair random number generator. |
+| **Keepers** | Chainlink's automation service that triggers functions on a schedule. |
+| **Multisig** | A wallet that requires multiple people to approve transactions (safer). |
+| **ERC20** | A standard for tokens on Ethereum/Polygon (USDC, LINK, FDM are all ERC20). |
+| **Aave** | A DeFi lending protocol where FreedomPool earns yield. |
+| **Vercel** | A free hosting platform for websites. |
+| **Hardhat** | A development tool for writing, testing, and deploying smart contracts. |
 
 ---
 
-*Document maintained by the FreedomPool team. For questions, open an issue on GitHub.*
+## Quick Reference Card
+
+### All Commands in One Place
+
+```bash
+# ─── Setup ────────────────────────────────────
+git clone https://github.com/Tarantababu/FreedomPool.git
+cd FreedomPool
+npm install
+cd frontend && npm install && cd ..
+
+# ─── Configure ────────────────────────────────
+cp .env.example .env          # Edit with your keys
+cp frontend/.env.example frontend/.env  # Edit with your keys
+
+# ─── Smart Contracts ──────────────────────────
+npx hardhat compile            # Compile contracts
+npx hardhat test               # Run tests
+npx hardhat run scripts/deploy.js --network amoy     # Deploy testnet
+npx hardhat run scripts/deploy.js --network polygon  # Deploy mainnet
+
+# ─── Frontend ─────────────────────────────────
+cd frontend
+npm run dev                    # Run locally (http://localhost:5173)
+npm run build                  # Build for production
+vercel                         # Deploy to Vercel
+vercel --prod                  # Deploy to production
+
+# ─── Git (making changes) ─────────────────────
+git add .
+git commit -m "description of change"
+git push origin main
+```
+
+### All URLs You'll Need
+
+| Service | URL |
+|---------|-----|
+| Your Repository | https://github.com/Tarantababu/FreedomPool |
+| Polygon Faucet | https://faucet.polygon.technology/ |
+| Chainlink Faucet | https://faucets.chain.link/ |
+| Aave Faucet | https://app.aave.com/faucet/ |
+| Chainlink VRF | https://vrf.chain.link/ |
+| Chainlink Keepers | https://automation.chain.link/ |
+| Alchemy Dashboard | https://dashboard.alchemy.com/ |
+| Polygonscan (Mainnet) | https://polygonscan.com/ |
+| Polygonscan (Testnet) | https://amoy.polygonscan.com/ |
+| Vercel Dashboard | https://vercel.com/dashboard |
+| WalletConnect Cloud | https://cloud.walletconnect.com/ |
+
+### Cost Summary
+
+| Item | Testnet | Mainnet |
+|------|---------|---------|
+| Deployment gas | Free | ~$5-10 in MATIC |
+| Chainlink VRF | Free | ~$0.25 per lottery draw |
+| Chainlink Keepers | Free | ~$0.10 per week |
+| Alchemy RPC | Free (300M units/mo) | Free tier sufficient |
+| Vercel hosting | Free (100GB/mo) | Free tier sufficient |
+| WalletConnect | Free | Free |
+| Custom domain | N/A | ~$12/year |
+| **Total to start** | **$0** | **~$20-30** |
+| **Monthly ongoing** | **$0** | **~$5-10** |
+
+---
+
+*Last updated: May 2026. If you get stuck, open an issue on GitHub.*
