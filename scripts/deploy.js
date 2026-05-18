@@ -55,7 +55,7 @@ async function main() {
   console.log("═══════════════════════════════════════════════════════════");
   console.log(`  Network:  ${network.name} (chain ${chainId})`);
   console.log(`  Deployer: ${deployer.address}`);
-  console.log(`  Balance:  ${ethers.formatEther(await ethers.provider.getBalance(deployer.address))} MATIC`);
+  console.log(`  Balance:  ${ethers.formatEther(await ethers.provider.getBalance(deployer.address))} POL`);
   console.log("───────────────────────────────────────────────────────────");
 
   // 1. Deploy FreedomToken

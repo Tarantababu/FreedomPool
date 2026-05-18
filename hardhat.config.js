@@ -16,18 +16,18 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: process.env.POLYGON_RPC_URL || "https://polygon-rpc.com",
+        url: process.env.POLYGON_RPC_URL || "https://polygon.drpc.org",
         blockNumber: 52000000,
       },
     },
     amoy: {
-      url: process.env.AMOY_RPC_URL || "https://rpc-amoy.polygon.technology",
+      url: process.env.AMOY_RPC_URL || "https://polygon-amoy.drpc.org",
       chainId: 80002,
       accounts: [PRIVATE_KEY],
       gasPrice: 30000000000, // 30 gwei
     },
     polygon: {
-      url: process.env.POLYGON_RPC_URL || "https://polygon-rpc.com",
+      url: process.env.POLYGON_RPC_URL || "https://polygon.drpc.org",
       chainId: 137,
       accounts: [PRIVATE_KEY],
       gasPrice: 50000000000, // 50 gwei

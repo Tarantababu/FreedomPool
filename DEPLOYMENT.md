@@ -154,18 +154,18 @@ By default, MetaMask only shows Ethereum. We need to add Polygon:
 4. Click **"Add a network manually"**
 5. Fill in:
    - **Network Name:** Polygon Mainnet
-   - **New RPC URL:** `https://polygon-rpc.com`
+   - **New RPC URL:** `https://polygon.drpc.org`
    - **Chain ID:** `137`
-   - **Currency Symbol:** `MATIC`
+   - **Currency Symbol:** `POL`
    - **Block Explorer URL:** `https://polygonscan.com`
 6. Click **Save**
 
 Now add the testnet too:
 1. Same steps, but use:
    - **Network Name:** Polygon Amoy Testnet
-   - **New RPC URL:** `https://rpc-amoy.polygon.technology`
+   - **New RPC URL:** `https://polygon-amoy.drpc.org`
    - **Chain ID:** `80002`
-   - **Currency Symbol:** `MATIC`
+   - **Currency Symbol:** `POL`
    - **Block Explorer URL:** `https://amoy.polygonscan.com`
 2. Click **Save**
 
@@ -173,19 +173,19 @@ Now add the testnet too:
 
 ## 4. Get Free Test Money
 
-On the testnet, everything is free. You need "test MATIC" (for gas fees) and "test LINK" (for the lottery system).
+On the testnet, everything is free. You need "test POL" (for gas fees) and "test LINK" (for the lottery system).
 
-### 4.1 Get Test MATIC (Gas Money)
+### 4.1 Get Test POL (Gas Money)
 
 Gas = the fee you pay to execute transactions on blockchain. On testnet it's free.
 
 1. Go to https://faucet.polygon.technology/
 2. Select network: **Amoy**
-3. Select token: **MATIC**
+3. Select token: **POL**
 4. Paste your wallet address (from Step 3.3)
 5. Click **"Submit"**
 6. Wait 30 seconds
-7. Check MetaMask — you should see 0.5 MATIC on Polygon Amoy
+7. Check MetaMask — you should see 0.5 POL on Polygon Amoy
 
 If that faucet doesn't work, try: https://www.alchemy.com/faucets/polygon-amoy
 
@@ -373,7 +373,7 @@ npx hardhat run scripts/deploy.js --network amoy
 ═══════════════════════════════════════════════════════════
   Network:  amoy (chain 80002)
   Deployer: 0xYourWalletAddress
-  Balance:  0.45 MATIC
+  Balance:  0.45 POL
 ───────────────────────────────────────────────────────────
 
 1️⃣  Deploying FreedomToken (FDM)...
@@ -402,7 +402,7 @@ npx hardhat run scripts/deploy.js --network amoy
 Open `deployments/amoy.json` — it contains all your deployed contract addresses. You'll need these for the frontend.
 
 **If deployment fails:**
-- "Insufficient funds" → Go back to Step 4.1 and get more test MATIC
+- "Insufficient funds" → Go back to Step 4.1 and get more test POL
 - "Nonce too low" → Wait 30 seconds and try again
 - "Could not connect" → Check your `AMOY_RPC_URL` in `.env`
 
@@ -594,13 +594,13 @@ Open your deployed website and test each step:
 |---|---------|---------|
 | Money | Fake (free) | Real ($$$) |
 | Network | Amoy (80002) | Polygon (137) |
-| MATIC needed | Free from faucet | Buy on exchange (~$5-10) |
+| MATIC/POL needed | Free from faucet | Buy on exchange (~$5-10) |
 | LINK needed | Free from faucet | Buy on exchange (~$50) |
 | Mistakes | No consequences | Could lose real money |
 
 ### 11.2 Mainnet Deployment Steps
 
-1. **Get real MATIC:** Buy on Coinbase/Binance, send to your deployer wallet
+1. **Get real POL:** Buy POL (formerly MATIC) on Coinbase/Binance, send to your deployer wallet
 2. **Get real LINK:** Buy LINK on Polygon, need ~10 LINK for VRF
 3. **Create mainnet Alchemy app** (Step 5.1 but select "Polygon Mainnet")
 4. **Create mainnet VRF subscription** (Step 8 but on Polygon Mainnet)
@@ -677,8 +677,8 @@ git push -u origin feature/my-change
 | **Smart Contract** | A program that runs on the blockchain. Once deployed, it can't be changed. |
 | **Wallet** | Software that holds your crypto keys. Like a bank account you fully control. |
 | **Private Key** | A secret 64-character code that controls your wallet. NEVER share it. |
-| **Gas** | The fee paid to execute transactions on blockchain. Paid in MATIC on Polygon. |
-| **MATIC** | The native currency of Polygon. Used to pay gas fees. |
+| **Gas** | The fee paid to execute transactions on blockchain. Paid in POL on Polygon. |
+| **POL** | The native currency of Polygon (formerly called MATIC). Used to pay gas fees. |
 | **USDC** | A stablecoin pegged to $1 USD. What users deposit into FreedomPool. |
 | **LINK** | Chainlink's token. Used to pay for VRF (randomness) and Keepers (automation). |
 | **Testnet** | A fake version of the blockchain for testing. Everything is free. |
@@ -752,7 +752,7 @@ git push origin main
 
 | Item | Testnet | Mainnet |
 |------|---------|---------|
-| Deployment gas | Free | ~$5-10 in MATIC |
+| Deployment gas | Free | ~$5-10 in POL |
 | Chainlink VRF | Free | ~$0.25 per lottery draw |
 | Chainlink Keepers | Free | ~$0.10 per week |
 | Alchemy RPC | Free (300M units/mo) | Free tier sufficient |

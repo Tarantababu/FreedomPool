@@ -8,16 +8,16 @@ export const CHAINS = {
   polygon: {
     id: 137,
     name: "Polygon",
-    rpcUrl: "https://polygon-rpc.com",
+    rpcUrl: "https://polygon.drpc.org",
     blockExplorer: "https://polygonscan.com",
-    nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 },
+    nativeCurrency: { name: "POL", symbol: "POL", decimals: 18 },
   },
   amoy: {
     id: 80002,
     name: "Polygon Amoy",
-    rpcUrl: "https://rpc-amoy.polygon.technology",
+    rpcUrl: "https://polygon-amoy.drpc.org",
     blockExplorer: "https://amoy.polygonscan.com",
-    nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 },
+    nativeCurrency: { name: "POL", symbol: "POL", decimals: 18 },
   },
 };
 
